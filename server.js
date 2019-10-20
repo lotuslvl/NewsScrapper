@@ -1,6 +1,7 @@
 var express = require("express");
 var logger = require("morgan");
 var mongoose = require("mongoose");
+var request=require('request');
 
 // Our scraping tools
 // Axios is a promised-based http library, similar to jQuery's Ajax method
@@ -28,17 +29,29 @@ app.use(express.static("public"));
 
 // Connect to the Mongo DB
 //mongoose.connect("mongodb://localhost/unit18Populater", { useNewUrlParser: true });
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+var databaseURI= "mongodb://localhost/mongoHeadlines";
 
-mongoose.connect(MONGODB_URI,{ useNewUrlParser: true });
+if (process.env.MONGODB_URI) {
+
+  mongoose.connect(process.env.MONGODB_URI);
+}
+
+else{
+
+  mongoose.connect(databaseURI);
+}
+
+//var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+//mongoose.connect(MONGODB_URI,{ useNewUrlParser: true });
 
 // Routes
 
 // A GET route for scraping the echoJS website
+// 
 app.get("/scrape", function(req, res) {
-  console.log("getting articles");
   // First, we grab the body of the html with axios
-  axios.get("https://www.nytimes.com/").then(function(response) {
+  axios.get("https://www.nytimes.com/section/politics").then(function(response) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(response.data);
 
@@ -126,3 +139,18 @@ app.post("/articles/:id", function(req, res) {
 app.listen(PORT, function() {
   console.log("App running on port " + PORT + "!");
 });
+
+
+
+request('https://newsycombinator.com',
+function (error, response,
+  html) {
+
+    if (!error && response.statusCode==200) {
+
+      console.log(html);
+    }
+
+
+
+  });
